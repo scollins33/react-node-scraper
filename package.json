@@ -1,0 +1,39 @@
+{
+  "name": "eminence",
+  "version": "1.0.0",
+  "description": "React stack app to summarize data from various sources",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node dist/app.js",
+    "dev": "nodemon src/app.ts",
+    "build": "tsc -p ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scollins33/eminence.git"
+  },
+  "author": "Sean Collins",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/scollins33/eminence/issues"
+  },
+  "homepage": "https://github.com/scollins33/eminence#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "fetch-cookie": "^0.7.3",
+    "node-fetch": "^2.6.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.3",
+    "@types/node": "^13.7.7",
+    "@types/node-fetch": "^2.5.5",
+    "@types/request": "^2.48.4",
+    "@types/request-promise": "^4.1.45",
+    "nodemon": "^2.0.2",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.8.3"
+  }
+}
