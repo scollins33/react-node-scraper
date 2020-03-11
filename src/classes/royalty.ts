@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import cheerio from "cheerio";
 
 interface CookieJar {
     __cfduid: string;
@@ -51,31 +52,32 @@ export class RoyaltyAccount {
 
     }
 
-    login = async () => {
-        if (this.loggedIn) return true;
-
+    bakeCloudflare = async () => {
         // first we need to get the CloudFlare cookie
-        const baseURL = "***BASE_URL***";
-        const baseResponse = await fetch(baseURL, {
+        const response = await fetch("***BASE_URL***", {
             method: "get",
             headers: {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
             }
         });
         
-        const baseBody = await baseResponse.text(); // await pauses the execution
-        const baseCookie = baseResponse.headers.get("set-cookie")!; // Header obj (class), ! makes TS trust this isn't null
-        this.cookies.__cfduid = baseCookie.slice(0, baseCookie.indexOf(";")+1);
+        // const baseBody = await response.text(); // await pauses the execution
+        const cookieHeader = response.headers.get("set-cookie")!; // Header obj (class), ! makes TS trust this isn't null
+        this.cookies.__cfduid = cookieHeader.slice(0, cookieHeader.indexOf(";")+1);
         // console.log("-----------------");
-        // console.log(baseResponse.status, baseBody.slice(0,120) + "...");
-        // console.log(baseResponse.headers.get("set-cookie"));
+        // console.log(response.status, baseBody.slice(0,120) + "...");
+        // console.log(response.headers.get("set-cookie"));
         // console.log(this.cookies.__cfduid);
+        // console.log("got that cloudflare cookie");
 
-        console.log("got that cloudflare cookie");
+        return true;
+    }
+
+    bakeSessionId = async () => {
+        if (this.cookies.__cfduid === "") throw new Error("Missing CloudFlare cookie.");
 
         // now we can try to log in and get a session going
-        const loginURL: string = baseURL + "DGS/login.aspx";
-        const loginResponse = await fetch(loginURL, {
+        const response = await fetch("***LOGIN_URL***", {
             method: "post",
             headers: {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
@@ -86,22 +88,40 @@ export class RoyaltyAccount {
             redirect: "manual" // so that we get the 302 and stop
         });
         
-        const loginResBody = await loginResponse.text(); // await pauses the execution
-        const loginCookie = loginResponse.headers.get("set-cookie")!; // Header obj (class), ! makes TS trust this isn't null
-        this.cookies.sessionId = loginCookie.slice(0, loginCookie.indexOf(";")+1);
+        // const loginResBody = await response.text(); // await pauses the execution
+        const cookieHeader = response.headers.get("set-cookie")!; // Header obj (class), ! makes TS trust this isn't null
+        
+        // null means we failed the login (wrong password etc)
+        if (cookieHeader == null) throw new Error("Failed login, did not get a set-cookie header.");
+
+        this.cookies.sessionId = cookieHeader.slice(0, cookieHeader.indexOf(";")+1);
         // console.log("-----------------");
-        // console.log(loginResponse.status, loginResBody.slice(0,120) + "...");
-        // console.log(...loginResponse.headers); // expand the headers class
+        // console.log(response.status, loginResBody.slice(0,120) + "...");
+        // console.log(...response.headers); // expand the headers class
         // console.log(this.cookies.sessionId);
+        // console.log("and now I got the session cookie");
 
-        console.log("and now I got the session cookie");
-
-        this.loggedIn = true;
+        return true;
     }
 
-    pullData = async (): Promise<any> => {
-        const baseURL = "***DATA_URL***";
-        const baseResponse = await fetch(baseURL, {
+    login = async () => {
+        if (this.loggedIn) return true;
+
+        try {
+            await this.bakeCloudflare();
+            await this.bakeSessionId();
+
+            this.loggedIn = true;
+        }
+        catch(err) {
+            console.error(err);
+            return false;
+        }
+
+    }
+
+    requestData = async (): Promise<any> => {
+        const response = await fetch("***DATA_URL***", {
             method: "get",
             headers: {
                 "Cookie": this.cookies.__cfduid + this.cookies.sessionId + this.cookies.pl,
@@ -109,12 +129,44 @@ export class RoyaltyAccount {
             }
         });
         
-        const baseBody = await baseResponse.text(); // await pauses the execution
-        
-        return baseBody;
+        const body = await response.text(); // await pauses the execution
+
+        return this.parseData(body);
     }
 
-    // static parseData(dataString: string): any {
-    //
-    // }
+    parseData(dataString: string): any {
+        // clear the old data
+        this.data = {};
+
+        const $ = cheerio.load(dataString);
+        const $table = $("#content table");
+        const $bodyRows = $table.find("tbody tr");
+        
+        // each row
+        $bodyRows.each((i: number, row: CheerioElement) => {
+            const $tableCells = $(row).children("td");
+            this.data[i] = {}; // initialize the row in the object
+
+            // each cell
+            $tableCells.each((j: number, cell: CheerioElement) => {
+                const cellType = this.dataTypes[j];
+                let text = $(cell).text();
+                
+                text = text.replace(/(\r\n|\n|\r|\t)/gm,""); // get rid of line breaks
+                text = text.replace(/\s+/g," "); // remove all extra whitespace
+
+                if (cellType === "GameDate" && text !== "No Open Bets") {
+                    text = text.slice(text.length-16, text.length); // remove Ticket#
+                }
+
+                this.data[i][cellType] = text;
+            }); // end cell
+        }); // end row
+
+        return this.data;
+    }
+
+    getData(): DataStorage {
+        return this.data;
+    }
 }

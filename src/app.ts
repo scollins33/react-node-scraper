@@ -1,5 +1,5 @@
 import express, { Application, Request, Response, NextFunction } from "express";
-import cheerio from "cheerio";
+import path from "path";
 
 import { RoyaltyAccount } from "./classes/royalty";
 
@@ -10,62 +10,67 @@ interface AccountList {
 const gPORT: number = 3000;
 const gAPP: Application = express();
 
-gAPP.get("/", (req: Request, res: Response, next: NextFunction) => res.send("I'm listening, what is your command?"));
-
-const accounts: AccountList = {
+const gACCOUNTS: AccountList = {
     "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***"),
     "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***"),
     "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***"),
     "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***"),
+    // "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***"), // bad login
     "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***"),
 };
-// const tester = accounts["***REMOVED***"];
-// const tester = accounts["***REMOVED***"];
-// console.table(tester);
 
-gAPP.get("/api/data/:account", async (req: Request, res: Response, next: NextFunction) => {
+gAPP.use(express.static(path.join(__dirname + "/../dist/public")));
+
+gAPP.get("/", (req: Request, res: Response, next: NextFunction) => {
+    console.log("serving index.html from", __dirname);
+    res.sendFile(path.join(__dirname + "/public/index.html"));
+});
+
+gAPP.get("/api/data/account/:account", async (req: Request, res: Response, next: NextFunction) => {
     let targetAccount: RoyaltyAccount;
 
-    if (accounts.hasOwnProperty(req.params.account)) {
-        targetAccount = accounts[req.params.account];
+    if (gACCOUNTS.hasOwnProperty(req.params.account)) {
+        targetAccount = gACCOUNTS[req.params.account];
     }
     else return res.status(400).send("Account does not exist");
     
     await targetAccount.login();
-    console.log("WEESAH LOGGED IN");
-
-    let htmlString = await targetAccount.pullData();
+    const data = await targetAccount.requestData();
     
-    // clear the old data
-    targetAccount.data = {};
+    // console.log(data);
+    res.json(data);
+});
 
-    const $ = cheerio.load(htmlString);
-    const $table = $("#content table");
-    const $bodyRows = $table.find("tbody tr");
-    
-    // each row
-    $bodyRows.each(function(this: CheerioElement, i: number, row: CheerioElement) {
-        const $tableCells = $(this).children("td");
-        targetAccount.data[i] = {}; // initialize the row in the object
+gAPP.get("/api/data/accounts", async (req: Request, res: Response, next: NextFunction) => {
+    const jsonBundle: any = {};
+    const accounts = Object.keys(gACCOUNTS);
 
-        // each cell
-        $tableCells.each(function(this: CheerioElement, j: number, cell: CheerioElement) {
-            const cellType = targetAccount.dataTypes[j];
-            let text = $(this).text();
+    // catch all of the promises in an array
+    const promises = accounts.map(async account => {
+        await gACCOUNTS[account].login();
+        const data = await gACCOUNTS[account].requestData();
 
-            text = text.replace(/(\r\n|\n|\r|\t)/gm,""); // get rid of line breaks
-            text = text.replace(/\s+/g," "); // remove all extra whitespace
-            if (cellType === "GameDate") text = text.slice(text.length-16, text.length); // remove Ticket#
-
-            if (text === "No Open Bets") console.log("..... NO BETS!!!");
-
-            targetAccount.data[i][cellType] = text;
-        });
-
+        jsonBundle[account] = data;
+        return true;
     });
 
-    // console.log(data);
-    res.send(targetAccount.data);
+    // now we wait for all of the map's promises to complete
+    await Promise.all(promises);
+    res.json(jsonBundle);
+});
+
+gAPP.get("/api/test", async (req: Request, res: Response, next: NextFunction) => {
+    const tester = gACCOUNTS["***REMOVED***"];
+    // const tester = gACCOUNTS["***REMOVED***"];
+    // const tester = gACCOUNTS["***REMOVED***"];
+    // const tester = gACCOUNTS["***REMOVED***"];
+    // const tester = gACCOUNTS["***REMOVED***"];
+    // console.table(tester);
+
+    await tester.bakeCloudflare();
+    await tester.bakeSessionId();
+
+    res.status(200).send("Tested");
 });
 
 gAPP.listen(gPORT, () => console.log(`Server running on ${gPORT}`));
