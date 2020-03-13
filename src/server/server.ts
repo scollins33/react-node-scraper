@@ -1,4 +1,4 @@
-import express, { Application, Request, Response, NextFunction } from "express";
+import express, { Application, Request, Response, NextFunction, response } from "express";
 import path from "path";
 
 import { RoyaltyAccount } from "./classes/royalty";
@@ -7,7 +7,6 @@ interface AccountList {
     [key: string]: RoyaltyAccount,
 }
 
-const gPORT: number = 3000;
 const gAPP: Application = express();
 
 const gACCOUNTS: AccountList = {
@@ -15,15 +14,19 @@ const gACCOUNTS: AccountList = {
     "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***"),
     "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***"),
     "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***"),
-    // "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***"), // bad login
     "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***"),
+    // "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***1"), // bad login
 };
 
-gAPP.use(express.static(path.join(__dirname + "/../dist/public")));
+gAPP.use(express.static(path.join(__dirname + "/../app")));
 
 gAPP.get("/", (req: Request, res: Response, next: NextFunction) => {
     console.log("serving index.html from", __dirname);
     res.sendFile(path.join(__dirname + "/public/index.html"));
+});
+
+gAPP.get("/ping", (req: Request, res: Response, next: NextFunction) => {
+    return res.send("pong");
 });
 
 gAPP.get("/api/data/account/:account", async (req: Request, res: Response, next: NextFunction) => {
@@ -73,4 +76,4 @@ gAPP.get("/api/test", async (req: Request, res: Response, next: NextFunction) =>
     res.status(200).send("Tested");
 });
 
-gAPP.listen(gPORT, () => console.log(`Server running on ${gPORT}`));
+gAPP.listen(process.env.PORT || 8080, () => console.log(`Server running on ${process.env.PORT || 8080}`));
