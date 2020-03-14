@@ -2,12 +2,12 @@
   "name": "eminence",
   "version": "1.0.0",
   "description": "React stack app to summarize data from various sources",
-  "main": "app.js",
+  "main": "server/dist/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node dist/server/server.js",
-    "dev": "nodemon src/server/server.ts",
-    "build": "tsc -p ."
+    "dev": "npm run watchServer & nodemon server/dist/server.js",
+    "watchServer": "tsc -p ./server/tsconfig.json --watch",
+    "buildServer": "tsc -p ./server/tsconfig.json",
+    "buildClient": "tsc -p ./client/tsconfig.json"
   },
   "proxy": "http://localhost:8080",
   "repository": {
@@ -25,6 +25,8 @@
     "express": "^4.17.1",
     "fetch-cookie": "^0.7.3",
     "node-fetch": "^2.6.0",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.5"
   },
@@ -39,8 +41,6 @@
     "@types/request-promise": "^4.1.45",
     "create-react-app": "^3.4.0",
     "nodemon": "^2.0.2",
-    "react": "^16.13.0",
-    "react-dom": "^16.13.0",
     "source-map-loader": "^0.2.4",
     "ts-loader": "^6.2.1",
     "ts-node": "^8.6.2",

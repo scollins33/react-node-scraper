@@ -18,11 +18,13 @@ const gACCOUNTS: AccountList = {
     // "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***1"), // bad login
 };
 
-gAPP.use(express.static(path.join(__dirname + "/../app")));
+gAPP.use("/node_modules", express.static(path.join(__dirname + "/../../node_modules")));
+gAPP.use("/dist", express.static(path.join(__dirname + "/../../client/dist")));
 
 gAPP.get("/", (req: Request, res: Response, next: NextFunction) => {
-    console.log("serving index.html from", __dirname);
-    res.sendFile(path.join(__dirname + "/public/index.html"));
+    const indexPath = path.join(__dirname + "/../../client/index.html");
+    console.log("serving index.html from", indexPath);
+    res.sendFile(indexPath);
 });
 
 gAPP.get("/ping", (req: Request, res: Response, next: NextFunction) => {
@@ -47,6 +49,8 @@ gAPP.get("/api/data/account/:account", async (req: Request, res: Response, next:
 gAPP.get("/api/data/accounts", async (req: Request, res: Response, next: NextFunction) => {
     const jsonBundle: any = {};
     const accounts = Object.keys(gACCOUNTS);
+
+    console.log("GETTING THE ACCOUNTS");
 
     // catch all of the promises in an array
     const promises = accounts.map(async account => {

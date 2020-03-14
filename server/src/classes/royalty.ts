@@ -106,6 +106,7 @@ export class RoyaltyAccount {
 
     login = async () => {
         if (this.loggedIn) return true;
+        console.log("logging in to", this.account);
 
         try {
             await this.bakeCloudflare();

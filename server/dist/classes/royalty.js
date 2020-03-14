@@ -64,6 +64,7 @@ class RoyaltyAccount {
         this.login = () => __awaiter(this, void 0, void 0, function* () {
             if (this.loggedIn)
                 return true;
+            console.log("logging in to", this.account);
             try {
                 yield this.bakeCloudflare();
                 yield this.bakeSessionId();

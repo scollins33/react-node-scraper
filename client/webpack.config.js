@@ -1,8 +1,16 @@
+const path = require("path");
+
 module.exports = {
     mode: "production",
 
     // sourcemaps for debugging
     devtool: "source-map",
+
+    // __direname is .../eminence/client
+    entry: path.resolve(__dirname, "src/index.tsx"),
+    output: {
+        path: path.resolve(__dirname, "dist"),
+    },
 
     resolve: {
         // TypeScript files

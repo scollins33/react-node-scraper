@@ -15,20 +15,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const path_1 = __importDefault(require("path"));
 const royalty_1 = require("./classes/royalty");
-const gPORT = 3000;
 const gAPP = express_1.default();
 const gACCOUNTS = {
     "***REMOVED***": new royalty_1.RoyaltyAccount("***REMOVED***", "***REMOVED***"),
     "***REMOVED***": new royalty_1.RoyaltyAccount("***REMOVED***", "***REMOVED***"),
     "***REMOVED***": new royalty_1.RoyaltyAccount("***REMOVED***", "***REMOVED***"),
     "***REMOVED***": new royalty_1.RoyaltyAccount("***REMOVED***", "***REMOVED***"),
-    // "***REMOVED***": new RoyaltyAccount("***REMOVED***", "***REMOVED***"), // bad login
     "***REMOVED***": new royalty_1.RoyaltyAccount("***REMOVED***", "***REMOVED***"),
 };
-gAPP.use(express_1.default.static(path_1.default.join(__dirname + "/../dist/public")));
+gAPP.use("/node_modules", express_1.default.static(path_1.default.join(__dirname + "/../../node_modules")));
+gAPP.use("/dist", express_1.default.static(path_1.default.join(__dirname + "/../../client/dist")));
 gAPP.get("/", (req, res, next) => {
-    console.log("serving index.html from", __dirname);
-    res.sendFile(path_1.default.join(__dirname + "/public/index.html"));
+    const indexPath = path_1.default.join(__dirname + "/../../client/index.html");
+    console.log("serving index.html from", indexPath);
+    res.sendFile(indexPath);
+});
+gAPP.get("/ping", (req, res, next) => {
+    return res.send("pong");
 });
 gAPP.get("/api/data/account/:account", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     let targetAccount;
@@ -45,6 +48,7 @@ gAPP.get("/api/data/account/:account", (req, res, next) => __awaiter(void 0, voi
 gAPP.get("/api/data/accounts", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const jsonBundle = {};
     const accounts = Object.keys(gACCOUNTS);
+    console.log("GETTING THE ACCOUNTS");
     // catch all of the promises in an array
     const promises = accounts.map((account) => __awaiter(void 0, void 0, void 0, function* () {
         yield gACCOUNTS[account].login();
@@ -67,4 +71,4 @@ gAPP.get("/api/test", (req, res, next) => __awaiter(void 0, void 0, void 0, func
     yield tester.bakeSessionId();
     res.status(200).send("Tested");
 }));
-gAPP.listen(gPORT, () => console.log(`Server running on ${gPORT}`));
+gAPP.listen(process.env.PORT || 8080, () => console.log(`Server running on ${process.env.PORT || 8080}`));
