@@ -1,4 +1,4 @@
-import express, { Application, Request, Response, NextFunction, response } from "express";
+import express, { Application, Request, Response, NextFunction } from "express";
 import path from "path";
 
 import { RoyaltyAccount } from "./classes/royalty";
