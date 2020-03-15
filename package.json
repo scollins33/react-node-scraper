@@ -4,8 +4,9 @@
   "description": "React stack app to summarize data from various sources",
   "main": "server/dist/server.js",
   "scripts": {
-    "dev": "npm run watchServer & nodemon server/dist/server.js",
+    "dev": "npm run watchClient & npm run watchServer & nodemon --ignore client/ --exec server/dist/server.js",
     "watchServer": "tsc -p ./server/tsconfig.json --watch",
+    "watchClient": "npx webpack --config ./client/webpack.config.js --watch",
     "buildServer": "tsc -p ./server/tsconfig.json",
     "buildClient": "tsc -p ./client/tsconfig.json"
   },

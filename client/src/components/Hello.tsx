@@ -1,5 +1,4 @@
 import * as React from "react";
-import { DiffieHellman } from "crypto";
 
 export interface HelloProps {
     compiler: string;
