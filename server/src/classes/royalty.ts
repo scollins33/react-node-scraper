@@ -6,10 +6,16 @@ interface CookieJar {
     sessionId: string;
     pl: string;
 }
-interface DataStorage {
-    [key: number]: { // row
-        [key: string]: string, // cell
-    },
+
+// @TODO shouldn't use an indexer but complicated to refactor with DataTypings
+interface DataRow {
+    // GameDate: string,
+    // User: string,
+    // DatePlaced: string,
+    // Sport: string,
+    // Description: string,
+    // RiskWin: string,
+    [key: string]: string,
 }
 interface DataTypings {
     [key: number]: string,
@@ -21,7 +27,7 @@ export class RoyaltyAccount {
     loggedIn: boolean;
     cookies: CookieJar;
     dataTypes: DataTypings;
-    data: DataStorage;
+    data: DataRow[];
     
     constructor(user: string, pass: string) {
         this.account = user;
@@ -47,7 +53,7 @@ export class RoyaltyAccount {
         }
         this.dataTypes = theseTypes;
 
-        const newData: DataStorage = {};
+        const newData: DataRow[] = [];
         this.data = newData;
 
     }
@@ -135,39 +141,43 @@ export class RoyaltyAccount {
         return this.parseData(body);
     }
 
-    parseData(dataString: string): any {
+    parseData(dataString: string): DataRow[] {
         // clear the old data
-        this.data = {};
+        this.data = [];
 
         const $ = cheerio.load(dataString);
         const $table = $("#content table");
         const $bodyRows = $table.find("tbody tr");
+        const data: DataRow[] = [];
         
         // each row
         $bodyRows.each((i: number, row: CheerioElement) => {
             const $tableCells = $(row).children("td");
-            this.data[i] = {}; // initialize the row in the object
+            const thisRow: DataRow = {};
 
             // each cell
             $tableCells.each((j: number, cell: CheerioElement) => {
                 const cellType = this.dataTypes[j];
                 let text = $(cell).text();
                 
-                text = text.replace(/(\r\n|\n|\r|\t)/gm,""); // get rid of line breaks
-                text = text.replace(/\s+/g," "); // remove all extra whitespace
+                // text = text.replace(/(\r\n|\n|\r|\t)/gm,""); // get rid of line breaks
+                // text = text.replace(/\s+/g," "); // remove all extra whitespace
 
-                if (cellType === "GameDate" && text !== "No Open Bets") {
-                    text = text.slice(text.length-16, text.length); // remove Ticket#
-                }
+                // if (cellType === "GameDate" && text !== "No Open Bets") {
+                //     text = text.slice(text.length-16, text.length); // remove Ticket#
+                // }
 
-                this.data[i][cellType] = text;
+                thisRow[cellType] = text;
             }); // end cell
+
+            data.push(thisRow); // push the row to the array
         }); // end row
 
+        this.data = data;
         return this.data;
     }
 
-    getData(): DataStorage {
+    getData(): DataRow[] {
         return this.data;
     }
 }
