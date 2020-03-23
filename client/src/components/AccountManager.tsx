@@ -26,7 +26,7 @@ export class AccountManager extends React.Component<iProps, iState> {
     }
 
     refreshData = () => {
-        console.log("refreshData");
+        console.log("AccountManager refreshData");
         fetch("/api/data/accounts")
             .then((response) => {
                 return response.json();
@@ -40,7 +40,7 @@ export class AccountManager extends React.Component<iProps, iState> {
     }
 
     buildChildren = (): JSX.Element[] => {
-        console.log("running buildChildren AccountManager");
+        console.log("AccountManager running buildChildren");
         const children: JSX.Element[] = [];
 
         for (let account in this.state.accounts) {
@@ -59,7 +59,7 @@ export class AccountManager extends React.Component<iProps, iState> {
     ------------------ */ 
 
     componentDidMount() {
-        console.log("componentDidMount");
+        console.log("AccountManager componentDidMount");
         this.refreshData();
     }
 

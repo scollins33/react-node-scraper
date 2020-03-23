@@ -67,14 +67,9 @@ export class RoyaltyAccount {
             }
         });
         
-        // const baseBody = await response.text(); // await pauses the execution
+        await response.text(); // await pauses the execution, await the text so we know we have the full response
         const cookieHeader = response.headers.get("set-cookie")!; // Header obj (class), ! makes TS trust this isn't null
         this.cookies.__cfduid = cookieHeader.slice(0, cookieHeader.indexOf(";")+1);
-        // console.log("-----------------");
-        // console.log(response.status, baseBody.slice(0,120) + "...");
-        // console.log(response.headers.get("set-cookie"));
-        // console.log(this.cookies.__cfduid);
-        // console.log("got that cloudflare cookie");
 
         return true;
     }
@@ -94,18 +89,13 @@ export class RoyaltyAccount {
             redirect: "manual" // so that we get the 302 and stop
         });
         
-        // const loginResBody = await response.text(); // await pauses the execution
+        await response.text(); // await pauses the execution, await the text so we know we have the full response
         const cookieHeader = response.headers.get("set-cookie")!; // Header obj (class), ! makes TS trust this isn't null
         
         // null means we failed the login (wrong password etc)
         if (cookieHeader == null) throw new Error("Failed login, did not get a set-cookie header.");
 
         this.cookies.sessionId = cookieHeader.slice(0, cookieHeader.indexOf(";")+1);
-        // console.log("-----------------");
-        // console.log(response.status, loginResBody.slice(0,120) + "...");
-        // console.log(...response.headers); // expand the headers class
-        // console.log(this.cookies.sessionId);
-        // console.log("and now I got the session cookie");
 
         return true;
     }
@@ -119,9 +109,10 @@ export class RoyaltyAccount {
             await this.bakeSessionId();
 
             this.loggedIn = true;
+            return true;
         }
         catch(err) {
-            console.error(err);
+            console.error("LOGIN ERROR: " + err);
             return false;
         }
 
@@ -137,6 +128,7 @@ export class RoyaltyAccount {
         });
         
         const body = await response.text(); // await pauses the execution
+        console.log(this.account, this.cookies.sessionId, this.cookies.__cfduid, this.cookies.pl);
 
         return this.parseData(body);
     }
