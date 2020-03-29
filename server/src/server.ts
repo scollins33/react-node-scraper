@@ -20,6 +20,7 @@ const gACCOUNTS: AccountList = {
 
 gAPP.use("/node_modules", express.static(path.join(__dirname + "/../../node_modules")));
 gAPP.use("/dist", express.static(path.join(__dirname + "/../../client/dist")));
+gAPP.use("/css", express.static(path.join(__dirname + "/../../client")));
 
 gAPP.get("/", (req: Request, res: Response, next: NextFunction) => {
     const indexPath = path.join(__dirname + "/../../client/index.html");

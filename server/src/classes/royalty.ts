@@ -103,10 +103,16 @@ export class RoyaltyAccount {
     login = async () => {
         if (this.loggedIn) return true;
         console.log("logging in to", this.account);
-
+        
         try {
             await this.bakeCloudflare();
             await this.bakeSessionId();
+            
+            // timeout to "log out" after 15 minutes
+            setTimeout(() => {
+                console.log(this.account, "| setting loggedIn to false");
+                this.loggedIn = false;
+            }, 900000);
 
             this.loggedIn = true;
             return true;
@@ -128,6 +134,11 @@ export class RoyaltyAccount {
         });
         
         const body = await response.text(); // await pauses the execution
+        if (this.account === "***REMOVED***") {
+            console.log("***REMOVED*** Status:", response.status);
+            console.log(response.headers);
+            // console.log(body);
+        }
         console.log(this.account, this.cookies.sessionId, this.cookies.__cfduid, this.cookies.pl);
 
         return this.parseData(body);

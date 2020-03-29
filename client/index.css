@@ -1,0 +1,23 @@
+#accounts {
+    display: flex;
+    justify-content: space-evenly;
+    flex-direction: row;
+    margin-top: 10px;
+}
+
+.account {
+    border: 1px solid black;
+    flex: 1;
+    margin: 0 5px;
+}
+
+.accountHeader {
+    background-color: black;
+    color: white;
+    font-size: 20px;
+    text-align: center;
+}
+
+.accountBody {
+    padding: 10px 3px;
+}

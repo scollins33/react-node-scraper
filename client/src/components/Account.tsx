@@ -16,18 +16,18 @@ export class Account extends React.Component<iProps> {
     }
 
     buildChildren = (): JSX.Element[] => {
-        console.log("running buildChildren Account", );
         const children: JSX.Element[] = [];
+        
         for (let i = 0; i < this.props.rows.length; i++) {
             const thisRow = this.props.rows[i];
 
             if (thisRow.GameDate === "No Open Bets") {
-                children.push(<p key={i}>{`${thisRow.GameDate}`}</p>);
+                children.push(<div key={i}>{`${thisRow.GameDate}`}</div>);
             }
             else if (thisRow.DatePlaced != null && thisRow.Description != null) {
-                children.push(<p key={i}>{`${thisRow.DatePlaced} | ${thisRow.Description}`}</p>);
+                children.push(<div key={i}>{`${thisRow.DatePlaced} | ${thisRow.Description}`}</div>);
             }
-            else children.push(<p key={i}>{" -- Error getting data --"}</p>);
+            else children.push(<div key={i}>{" -- Error getting data --"}</div>);
         }
         return children;
     }
@@ -38,9 +38,11 @@ export class Account extends React.Component<iProps> {
 
     render() {
         return (
-            <div style={{"display": "block"}} id={this.props.name}>
-                <h1>{this.props.name}</h1>
-                {this.buildChildren()}
+            <div id={this.props.name} className="account">
+                <div className="accountHeader">{this.props.name}</div>
+                <div className="accountBody">
+                    {this.buildChildren()}
+                </div>
             </div>
         );
     }
