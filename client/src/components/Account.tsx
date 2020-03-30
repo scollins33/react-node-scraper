@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Entry } from "./Entry";
 
 interface DataRow {
     [key: string]: string,
@@ -22,10 +23,10 @@ export class Account extends React.Component<iProps> {
             const thisRow = this.props.rows[i];
 
             if (thisRow.GameDate === "No Open Bets") {
-                children.push(<div key={i}>{`${thisRow.GameDate}`}</div>);
+                children.push(<Entry key={i} name={this.props.name+"-"+i} date={thisRow.GameDate} description={thisRow.GameDate} />);
             }
             else if (thisRow.DatePlaced != null && thisRow.Description != null) {
-                children.push(<div key={i}>{`${thisRow.DatePlaced} | ${thisRow.Description}`}</div>);
+                children.push(<Entry key={i} name={this.props.name+"-"+i} date={thisRow.DatePlaced} description={thisRow.Description} />);
             }
             else children.push(<div key={i}>{" -- Error getting data --"}</div>);
         }

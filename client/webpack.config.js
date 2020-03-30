@@ -6,7 +6,7 @@ module.exports = {
     // sourcemaps for debugging
     devtool: "source-map",
 
-    // __direname is .../eminence/client
+    // __direname is .../react-node-scraper/client
     entry: path.resolve(__dirname, "src/index.tsx"),
     output: {
         path: path.resolve(__dirname, "dist"),

@@ -1,5 +1,5 @@
 {
-  "name": "eminence",
+  "name": "react-node-scraper",
   "version": "1.0.0",
   "description": "React stack app to summarize data from various sources",
   "main": "server/dist/server.js",
@@ -13,14 +13,14 @@
   "proxy": "http://localhost:8080",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/scollins33/eminence.git"
+    "url": "git+https://github.com/scollins33/react-node-scraper.git"
   },
   "author": "Sean Collins",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/scollins33/eminence/issues"
+    "url": "https://github.com/scollins33/react-node-scraper/issues"
   },
-  "homepage": "https://github.com/scollins33/eminence#readme",
+  "homepage": "https://github.com/scollins33/react-node-scraper#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "express": "^4.17.1",
