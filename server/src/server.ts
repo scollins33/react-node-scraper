@@ -98,7 +98,7 @@ gAPP.get("/api/data/accounts", async (req: Request, res: Response, next: NextFun
 });
 
 // gAPP.get("/api/test", async (req: Request, res: Response, next: NextFunction) => {
-//     const tester = gACCOUNTS["***REMOVED***"];
+//     const tester = gACCOUNTS[""];
 //     await tester.bakeCloudflare();
 //     await tester.bakeSessionId();
 //     res.status(200).send("Tested");
