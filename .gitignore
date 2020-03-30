@@ -2,3 +2,6 @@
 node_modules
 client/dist/*
 server/dist/*
+
+accounts.txt
+urls.txt

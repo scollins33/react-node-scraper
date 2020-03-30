@@ -1,5 +1,17 @@
+/* ----------------------
+    Module Imports
+---------------------- */
 import fetch from "node-fetch";
 import cheerio from "cheerio";
+
+/* ----------------------
+    Custom Interfaces
+---------------------- */
+interface UrlObject {
+    baseUrl: string,
+    loginUrl: string,
+    dataUrl: string,
+}
 
 interface CookieJar {
     __cfduid: string;
@@ -21,17 +33,22 @@ interface DataTypings {
     [key: number]: string,
 }
 
+/* ----------------------
+    Class Definition
+---------------------- */
 export class RoyaltyAccount {
     account: string;
     password: string;
+    urls: UrlObject;
     loggedIn: boolean;
     cookies: CookieJar;
     dataTypes: DataTypings;
     data: DataRow[];
     
-    constructor(user: string, pass: string) {
+    constructor(user: string, pass: string, urlObject: UrlObject) {
         this.account = user;
         this.password = pass;
+        this.urls = urlObject;
         this.loggedIn = false;
 
         // make the cookie jar
@@ -60,7 +77,7 @@ export class RoyaltyAccount {
 
     bakeCloudflare = async () => {
         // first we need to get the CloudFlare cookie
-        const response = await fetch("***BASE_URL***", {
+        const response = await fetch(this.urls.baseUrl, {
             method: "get",
             headers: {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
@@ -78,7 +95,7 @@ export class RoyaltyAccount {
         if (this.cookies.__cfduid === "") throw new Error("Missing CloudFlare cookie.");
 
         // now we can try to log in and get a session going
-        const response = await fetch("***LOGIN_URL***", {
+        const response = await fetch(this.urls.loginUrl, {
             method: "post",
             headers: {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
@@ -125,7 +142,7 @@ export class RoyaltyAccount {
     }
 
     requestData = async (): Promise<any> => {
-        const response = await fetch("***DATA_URL***", {
+        const response = await fetch(this.urls.dataUrl, {
             method: "get",
             headers: {
                 "Cookie": this.cookies.__cfduid + this.cookies.sessionId + this.cookies.pl,
@@ -134,11 +151,6 @@ export class RoyaltyAccount {
         });
         
         const body = await response.text(); // await pauses the execution
-        if (this.account === "***REMOVED***") {
-            console.log("***REMOVED*** Status:", response.status);
-            console.log(response.headers);
-            // console.log(body);
-        }
         console.log(this.account, this.cookies.sessionId, this.cookies.__cfduid, this.cookies.pl);
 
         return this.parseData(body);
