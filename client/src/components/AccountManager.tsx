@@ -8,6 +8,7 @@ interface iProps {
 
 interface iState {
     accounts: string[];
+    refreshing: boolean;
 }
 
 export class AccountManager extends React.Component<iProps, iState> {
@@ -15,7 +16,8 @@ export class AccountManager extends React.Component<iProps, iState> {
         super(props);
 
         this.state = {
-            accounts: []
+            accounts: [],
+            refreshing: true,
         }
     }
 
@@ -28,9 +30,21 @@ export class AccountManager extends React.Component<iProps, iState> {
             .then((data) => {
                 this.setState({
                     accounts: data
-                });
-                console.log(this.state);
+                }, () => console.log(this.state)); // console.log as a callback since setState is async
             });
+    }
+
+    toggleRefresh = () => {
+        this.setState(
+            prevState => {
+                return { refreshing: !prevState.refreshing }; // shallow copy the updated refreshing param
+            }, 
+            ()=> {
+                const toggleButton = document.getElementById("toggleDatarefresh")!;
+                toggleButton.innerHTML = (this.state.refreshing ? "Stop" : "Start") + " Data Refresh";
+                console.log(this.state); // console.log as a callback since setState is async
+            }
+        );
     }
 
     buildChildren = (): JSX.Element[] => {
@@ -38,8 +52,7 @@ export class AccountManager extends React.Component<iProps, iState> {
         const children:JSX.Element[] = [];
 
         this.state.accounts.forEach((account:string, index:number) => {
-            console.log(index, account);
-            children.push(<Account key={index} name={account} />);
+            children.push(<Account key={index} name={account} runRefresh={this.state.refreshing} />);
         });
 
         return children;
@@ -52,7 +65,8 @@ export class AccountManager extends React.Component<iProps, iState> {
     render() {
         return (
             <div>
-                <button id="refresh" onClick={this.getAccounts}>Refresh All</button>
+                <button id="refreshAccounts" onClick={this.getAccounts}>Refresh Account List</button>
+                <button id="toggleDatarefresh" onClick={this.toggleRefresh}>Stop Data Refresh</button>
 
                 <div id="accounts">
                     {this.buildChildren()}

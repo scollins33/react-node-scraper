@@ -7,6 +7,7 @@ interface DataRow {
 
 interface iProps {
     name: string,
+    runRefresh: boolean,
 }
 
 interface iState {
@@ -26,7 +27,7 @@ export class Account extends React.Component<iProps, iState> {
         // set the default refresh rate
         this.state = {
             rows: [],
-            refreshRange: [10000, 20000]
+            refreshRange: [10000, 20000],
         }
 
         this.dataUrl = "/api/data/account/" + this.props.name;
@@ -47,13 +48,17 @@ export class Account extends React.Component<iProps, iState> {
     }
 
     runUpdate = () => {
-        // first we do the refresh
-        this.requestData();
-
-        // now we set up for the next update (recursive timeouts baby!)
-        const newTime = Math.floor(Math.random() * (this.state.refreshRange[1] - this.state.refreshRange[0])) + this.state.refreshRange[0];
-        console.log(this.props.name, "runUpdate", newTime);
-        this.timeoutID = window.setTimeout(this.runUpdate, newTime);
+        // check if we should even be refreshing, otherwise just let it die
+        if (this.props.runRefresh) {
+            // first we do the refresh
+            this.requestData();
+    
+            // now we set up for the next update (recursive timeouts baby!)
+            const newTime = Math.floor(Math.random() * (this.state.refreshRange[1] - this.state.refreshRange[0])) + this.state.refreshRange[0];
+            console.log(this.props.name, "runUpdate", newTime);
+            this.timeoutID = window.setTimeout(this.runUpdate, newTime);
+        }
+        else console.log("stopped refreshing so we ignored this timeout");
     }
 
     buildChildren = (): JSX.Element[] => {
