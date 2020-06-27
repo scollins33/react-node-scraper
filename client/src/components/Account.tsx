@@ -11,13 +11,14 @@ interface iProps {
 
 interface iState {
     rows: DataRow[],
-    refreshRate: number[]
+    refreshRange: number[],
 }
 
 
 export class Account extends React.Component<iProps, iState> {
     /* Account Interface */
     dataUrl: string;
+    timeoutID: number;
 
     constructor(props: iProps) {
         super(props);
@@ -25,14 +26,15 @@ export class Account extends React.Component<iProps, iState> {
         // set the default refresh rate
         this.state = {
             rows: [],
-            refreshRate: [10000, 20000]
+            refreshRange: [10000, 20000]
         }
 
         this.dataUrl = "/api/data/account/" + this.props.name;
+        this.timeoutID = 0;
     }
 
     requestData = () => {
-        console.log("Account", this.props.name, "requestData", this.dataUrl);
+        console.log(this.props.name, "requestData", this.dataUrl);
         fetch(this.dataUrl)
             .then((response) => {
                 return response.json();
@@ -41,8 +43,17 @@ export class Account extends React.Component<iProps, iState> {
                 this.setState({
                     rows: data
                 });
-                console.log(this.state);
             });
+    }
+
+    runUpdate = () => {
+        // first we do the refresh
+        this.requestData();
+
+        // now we set up for the next update (recursive timeouts baby!)
+        const newTime = Math.floor(Math.random() * (this.state.refreshRange[1] - this.state.refreshRange[0])) + this.state.refreshRange[0];
+        console.log(this.props.name, "runUpdate", newTime);
+        this.timeoutID = window.setTimeout(this.runUpdate, newTime);
     }
 
     buildChildren = (): JSX.Element[] => {
@@ -80,6 +91,6 @@ export class Account extends React.Component<iProps, iState> {
 
     componentDidMount() {
         console.log("Account", this.props.name, "componentDidMount");
-        this.requestData();
+        this.runUpdate();
     }
 }
