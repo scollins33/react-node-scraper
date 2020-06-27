@@ -62,9 +62,8 @@ gAPP.get("/ping", (req: Request, res: Response, next: NextFunction) => {
     return res.send("pong");
 });
 
-/*
-    INFO ROUTES
-*/
+/*      INFO ROUTES     */
+
 gAPP.get("/api/info/accounts", async (req: Request, res: Response, next: NextFunction) => {
     const accArray = [];
 
@@ -75,9 +74,8 @@ gAPP.get("/api/info/accounts", async (req: Request, res: Response, next: NextFun
     res.json(accArray);
 });
 
-/*
-    DATA ROUTES 
-*/
+/*      DATA ROUTES     */
+
 gAPP.get("/api/data/account/:account", async (req: Request, res: Response, next: NextFunction) => {
     let targetAccount: RoyaltyAccount;
 

@@ -7,20 +7,50 @@ interface DataRow {
 
 interface iProps {
     name: string,
-    rows: DataRow[],
 }
 
-// use iProps for props and state since they will be the same interface
-export class Account extends React.Component<iProps> {
+interface iState {
+    rows: DataRow[],
+    refreshRate: number[]
+}
+
+
+export class Account extends React.Component<iProps, iState> {
+    /* Account Interface */
+    dataUrl: string;
+
     constructor(props: iProps) {
         super(props);
+
+        // set the default refresh rate
+        this.state = {
+            rows: [],
+            refreshRate: [10000, 20000]
+        }
+
+        this.dataUrl = "/api/data/account/" + this.props.name;
+    }
+
+    requestData = () => {
+        console.log("Account", this.props.name, "requestData", this.dataUrl);
+        fetch(this.dataUrl)
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                this.setState({
+                    rows: data
+                });
+                console.log(this.state);
+            });
     }
 
     buildChildren = (): JSX.Element[] => {
+        console.log("Account", this.props.name, "running buildChildren");
         const children: JSX.Element[] = [];
         
-        for (let i = 0; i < this.props.rows.length; i++) {
-            const thisRow = this.props.rows[i];
+        for (let i = 0; i < this.state.rows.length; i++) {
+            const thisRow = this.state.rows[i];
 
             if (thisRow.GameDate === "No Open Bets") {
                 children.push(<Entry key={i} name={this.props.name+"-"+i} date={""} description={thisRow.GameDate} />);
@@ -46,5 +76,10 @@ export class Account extends React.Component<iProps> {
                 </div>
             </div>
         );
+    }
+
+    componentDidMount() {
+        console.log("Account", this.props.name, "componentDidMount");
+        this.requestData();
     }
 }

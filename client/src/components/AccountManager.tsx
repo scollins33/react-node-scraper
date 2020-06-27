@@ -7,9 +7,7 @@ interface iProps {
 }
 
 interface iState {
-    accounts: {
-        [key: string]: [] // account name
-    };
+    accounts: string[];
 }
 
 export class AccountManager extends React.Component<iProps, iState> {
@@ -17,13 +15,13 @@ export class AccountManager extends React.Component<iProps, iState> {
         super(props);
 
         this.state = {
-            accounts: {}
+            accounts: []
         }
     }
 
-    refreshData = () => {
-        console.log("AccountManager refreshData");
-        fetch("/api/data/accounts")
+    getAccounts = () => {
+        console.log("AccountManager getAccounts");
+        fetch("/api/info/accounts")
             .then((response) => {
                 return response.json();
             })
@@ -37,15 +35,12 @@ export class AccountManager extends React.Component<iProps, iState> {
 
     buildChildren = (): JSX.Element[] => {
         console.log("AccountManager running buildChildren");
-        const children: JSX.Element[] = [];
+        const children:JSX.Element[] = [];
 
-        for (let account in this.state.accounts) {
-            console.log(account);
-            const info = this.state.accounts[account];
-
-            // passing DataRow[] from royalty account
-            children.push(<Account key={account} name={account} rows={info} />);
-        }
+        this.state.accounts.forEach((account:string, index:number) => {
+            console.log(index, account);
+            children.push(<Account key={index} name={account} />);
+        });
 
         return children;
     }
@@ -57,7 +52,7 @@ export class AccountManager extends React.Component<iProps, iState> {
     render() {
         return (
             <div>
-                <button id="refresh" onClick={this.refreshData}>Refresh All</button>
+                <button id="refresh" onClick={this.getAccounts}>Refresh All</button>
 
                 <div id="accounts">
                     {this.buildChildren()}
@@ -68,6 +63,6 @@ export class AccountManager extends React.Component<iProps, iState> {
 
     componentDidMount() {
         console.log("AccountManager componentDidMount");
-        this.refreshData();
+        this.getAccounts();
     }
 } 
