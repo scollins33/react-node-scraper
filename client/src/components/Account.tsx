@@ -23,7 +23,7 @@ export class Account extends React.Component<iProps> {
             const thisRow = this.props.rows[i];
 
             if (thisRow.GameDate === "No Open Bets") {
-                children.push(<Entry key={i} name={this.props.name+"-"+i} date={thisRow.GameDate} description={thisRow.GameDate} />);
+                children.push(<Entry key={i} name={this.props.name+"-"+i} date={""} description={thisRow.GameDate} />);
             }
             else if (thisRow.DatePlaced != null && thisRow.Description != null) {
                 children.push(<Entry key={i} name={this.props.name+"-"+i} date={thisRow.DatePlaced} description={thisRow.Description} />);

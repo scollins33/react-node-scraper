@@ -118,20 +118,23 @@ export class RoyaltyAccount {
     }
 
     login = async () => {
+        console.log(this.account, "login start");
         if (this.loggedIn) return true;
-        console.log("logging in to", this.account);
         
         try {
             await this.bakeCloudflare();
             await this.bakeSessionId();
+
+            console.log(this.account, this.cookies.__cfduid, this.cookies.sessionId);
             
             // timeout to "log out" after 15 minutes
             setTimeout(() => {
-                console.log(this.account, "| setting loggedIn to false");
+                console.log(this.account, "setting loggedIn to false");
                 this.loggedIn = false;
             }, 900000);
 
             this.loggedIn = true;
+            console.log(this.account, "login end");
             return true;
         }
         catch(err) {
@@ -142,6 +145,7 @@ export class RoyaltyAccount {
     }
 
     requestData = async (): Promise<any> => {
+        console.log(this.account, "requestData start");
         const response = await fetch(this.urls.dataUrl, {
             method: "get",
             headers: {
@@ -152,13 +156,16 @@ export class RoyaltyAccount {
         
         const body = await response.text(); // await pauses the execution
         console.log(this.account, this.cookies.sessionId, this.cookies.__cfduid, this.cookies.pl);
-
+        
+        console.log(this.account, "requestData end");
         return this.parseData(body);
     }
 
     parseData(dataString: string): DataRow[] {
+        console.log(this.account, "parseData start", this.data);
         // clear the old data
         this.data = [];
+        console.log(this.account, "parseData cleared", this.data);
 
         const $ = cheerio.load(dataString);
         const $table = $("#content table");
@@ -175,24 +182,28 @@ export class RoyaltyAccount {
                 const cellType = this.dataTypes[j];
                 let text = $(cell).text();
                 
-                // text = text.replace(/(\r\n|\n|\r|\t)/gm,""); // get rid of line breaks
-                // text = text.replace(/\s+/g," "); // remove all extra whitespace
+                text = text.replace(/(\r\n|\n|\r|\t)/gm,""); // get rid of line breaks
+                text = text.replace(/\s+/g," "); // remove all extra whitespace
 
-                // if (cellType === "GameDate" && text !== "No Open Bets") {
-                //     text = text.slice(text.length-16, text.length); // remove Ticket#
-                // }
+                if (cellType === "GameDate" && text !== "No Open Bets") {
+                    text = text.slice(text.length-16, text.length); // remove Ticket#
+                }
 
                 thisRow[cellType] = text;
+                console.log(this.account, i, j, text);
             }); // end cell
 
             data.push(thisRow); // push the row to the array
         }); // end row
 
         this.data = data;
+        console.log(this.account, "parseData parsed", data);
+        console.log(this.account, "parseData end", this.data);
         return this.data;
     }
 
     getData(): DataRow[] {
+        console.log(this.account, "getData triggered");
         return this.data;
     }
 }

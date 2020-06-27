@@ -12,10 +12,6 @@ interface iState {
     };
 }
 
-// export const Hello = (props: HelloProps) => {
-//     <h1>Hello from {props.compiler} and {props.framework}!</h1>;
-// }
-
 export class AccountManager extends React.Component<iProps, iState> {
     constructor(props: iProps) {
         super(props);
@@ -57,21 +53,21 @@ export class AccountManager extends React.Component<iProps, iState> {
     /* ------------------
         LIFECYCLE
     ------------------ */ 
-
-    componentDidMount() {
-        console.log("AccountManager componentDidMount");
-        this.refreshData();
-    }
-
+    
     render() {
         return (
             <div>
-                <button id="refresh" onClick={this.refreshData}>Refresh</button>
+                <button id="refresh" onClick={this.refreshData}>Refresh All</button>
 
                 <div id="accounts">
                     {this.buildChildren()}
                 </div>
             </div>
         );
+    }
+
+    componentDidMount() {
+        console.log("AccountManager componentDidMount");
+        this.refreshData();
     }
 } 

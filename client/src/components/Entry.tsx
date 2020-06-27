@@ -7,6 +7,15 @@ interface iProps {
 }
 
 export class Entry extends React.Component<iProps> {
+    constructor(props: iProps) {
+        super(props);
+    }
+
+    // if we have no bets don't show an empty text string
+    buildDate = (): JSX.Element => {
+        if (this.props.date === "") return <div className="entryDate"></div>;
+        else return <div className="entryDate">{this.props.date}</div>
+    }
 
     /* ------------------
         LIFECYCLE

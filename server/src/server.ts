@@ -62,6 +62,22 @@ gAPP.get("/ping", (req: Request, res: Response, next: NextFunction) => {
     return res.send("pong");
 });
 
+/*
+    INFO ROUTES
+*/
+gAPP.get("/api/info/accounts", async (req: Request, res: Response, next: NextFunction) => {
+    const accArray = [];
+
+    for (const account in gACCOUNTS) {
+        accArray.push(gACCOUNTS[account].account);
+    }
+
+    res.json(accArray);
+});
+
+/*
+    DATA ROUTES 
+*/
 gAPP.get("/api/data/account/:account", async (req: Request, res: Response, next: NextFunction) => {
     let targetAccount: RoyaltyAccount;
 
@@ -104,4 +120,7 @@ gAPP.get("/api/data/accounts", async (req: Request, res: Response, next: NextFun
 //     res.status(200).send("Tested");
 // });
 
+/* ----------------------
+    Start 'er up!
+---------------------- */
 gAPP.listen(process.env.PORT || 8080, () => console.log(`Server running on ${process.env.PORT || 8080}`));
