@@ -7,7 +7,6 @@ interface DataRow {
 
 interface iProps {
     name: string,
-    runRefresh: boolean,
 }
 
 interface iState {
@@ -21,6 +20,7 @@ export class Account extends React.Component<iProps, iState> {
     dataUrl: string;
     timeoutID: number;
 
+    /* Account Class */
     constructor(props: iProps) {
         super(props);
 
@@ -48,17 +48,17 @@ export class Account extends React.Component<iProps, iState> {
     }
 
     runUpdate = () => {
-        // check if we should even be refreshing, otherwise just let it die
-        if (this.props.runRefresh) {
-            // first we do the refresh
-            this.requestData();
-    
-            // now we set up for the next update (recursive timeouts baby!)
-            const newTime = Math.floor(Math.random() * (this.state.refreshRange[1] - this.state.refreshRange[0])) + this.state.refreshRange[0];
-            console.log(this.props.name, "runUpdate", newTime);
-            this.timeoutID = window.setTimeout(this.runUpdate, newTime);
-        }
-        else console.log("stopped refreshing so we ignored this timeout");
+        this.requestData();
+
+        // now we set up for the next update (recursive timeouts baby!)
+        const newTime = Math.floor(Math.random() * (this.state.refreshRange[1] - this.state.refreshRange[0])) + this.state.refreshRange[0];
+        this.timeoutID = window.setTimeout(this.runUpdate, newTime);
+        console.log(this.props.name, "runUpdate", newTime, "as ID", this.timeoutID);
+    }
+
+    stopUpdate = () => {
+        console.log(this.props.name, "stopUpdate as ID", this.timeoutID);
+        window.clearTimeout(this.timeoutID);
     }
 
     buildChildren = (): JSX.Element[] => {
@@ -96,6 +96,6 @@ export class Account extends React.Component<iProps, iState> {
 
     componentDidMount() {
         console.log("Account", this.props.name, "componentDidMount");
-        this.runUpdate();
+        this.runUpdate(); // kick off the update timeout
     }
 }

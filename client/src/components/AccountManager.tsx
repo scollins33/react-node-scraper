@@ -12,6 +12,10 @@ interface iState {
 }
 
 export class AccountManager extends React.Component<iProps, iState> {
+    /* Account Manager Interface */
+    childrenRefs: React.RefObject<Account>[]; 
+
+    /* Account Manager Class */
     constructor(props: iProps) {
         super(props);
 
@@ -19,6 +23,8 @@ export class AccountManager extends React.Component<iProps, iState> {
             accounts: [],
             refreshing: true,
         }
+
+        this.childrenRefs = [];
     }
 
     getAccounts = () => {
@@ -43,6 +49,19 @@ export class AccountManager extends React.Component<iProps, iState> {
                 const toggleButton = document.getElementById("toggleDatarefresh")!;
                 toggleButton.innerHTML = (this.state.refreshing ? "Stop" : "Start") + " Data Refresh";
                 console.log(this.state); // console.log as a callback since setState is async
+
+                if(this.state.refreshing) {
+                    // start the refresh timeouts
+                    this.childrenRefs.forEach((child:React.RefObject<Account>, index:number) => {
+                        child.current?.runUpdate();
+                    });
+                }
+                else {
+                    // kill the refresh timeouts
+                    this.childrenRefs.forEach((child:React.RefObject<Account>, index:number) => {
+                        child.current?.stopUpdate();
+                    });
+                }
             }
         );
     }
@@ -52,7 +71,10 @@ export class AccountManager extends React.Component<iProps, iState> {
         const children:JSX.Element[] = [];
 
         this.state.accounts.forEach((account:string, index:number) => {
-            children.push(<Account key={index} name={account} runRefresh={this.state.refreshing} />);
+            const childRef = React.createRef<Account>();
+            this.childrenRefs.push(childRef);
+
+            children.push(<Account key={index} name={account} ref={childRef} />);
         });
 
         return children;

@@ -87,7 +87,7 @@ gAPP.get("/api/data/account/:account", async (req: Request, res: Response, next:
     await targetAccount.login();
     const data = await targetAccount.requestData();
     
-    // console.log(data);
+    console.log("sending JSON:", req.params.account, data);
     res.json(data);
 });
 
