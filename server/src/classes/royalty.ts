@@ -76,6 +76,7 @@ export class RoyaltyAccount {
     }
 
     bakeCloudflare = async () => {
+        console.log(this.account, "bakeCloudflare start");
         // first we need to get the CloudFlare cookie
         const response = await fetch(this.urls.baseUrl, {
             method: "get",
@@ -88,10 +89,14 @@ export class RoyaltyAccount {
         const cookieHeader = response.headers.get("set-cookie")!; // Header obj (class), ! makes TS trust this isn't null
         this.cookies.__cfduid = cookieHeader.slice(0, cookieHeader.indexOf(";")+1);
 
+        console.log(this.account, "this.cookies.__cfduid", this.cookies.__cfduid);
+        console.log(this.account, "bakeCloudflare end");
+
         return true;
     }
 
     bakeSessionId = async () => {
+        console.log(this.account, "bakeSessionId start");
         if (this.cookies.__cfduid === "") throw new Error("Missing CloudFlare cookie.");
 
         // now we can try to log in and get a session going
@@ -114,6 +119,8 @@ export class RoyaltyAccount {
 
         this.cookies.sessionId = cookieHeader.slice(0, cookieHeader.indexOf(";")+1);
 
+        console.log(this.account, "this.cookies.sessionId", this.cookies.sessionId);
+        console.log(this.account, "bakeSessionId end");
         return true;
     }
 
@@ -122,10 +129,11 @@ export class RoyaltyAccount {
         if (this.loggedIn) return true;
         
         try {
+            console.log(this.account, "login trying to bake cookies");
             await this.bakeCloudflare();
             await this.bakeSessionId();
 
-            console.log(this.account, this.cookies.__cfduid, this.cookies.sessionId);
+            console.log(this.account, "login cookies baked:", this.cookies.__cfduid, this.cookies.sessionId);
             
             // timeout to "log out" after 15 minutes
             setTimeout(() => {

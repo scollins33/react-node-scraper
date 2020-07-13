@@ -35,7 +35,6 @@ export class Account extends React.Component<iProps, iState> {
     }
 
     requestData = () => {
-        console.log(this.props.name, "requestData", this.dataUrl);
         fetch(this.dataUrl)
             .then((response) => {
                 return response.json();
@@ -62,7 +61,6 @@ export class Account extends React.Component<iProps, iState> {
     }
 
     buildChildren = (): JSX.Element[] => {
-        console.log("Account", this.props.name, "running buildChildren");
         const children: JSX.Element[] = [];
         
         for (let i = 0; i < this.state.rows.length; i++) {
@@ -95,7 +93,6 @@ export class Account extends React.Component<iProps, iState> {
     }
 
     componentDidMount() {
-        console.log("Account", this.props.name, "componentDidMount");
         this.runUpdate(); // kick off the update timeout
     }
 }

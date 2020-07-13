@@ -14,13 +14,18 @@ import { RoyaltyAccount } from "./classes/royalty";
     Custom Interfaces
 ---------------------- */
 interface AccountList {
-    [key: string]: RoyaltyAccount,
+    [key: string]: RoyaltyAccount;
 }
 
 interface UrlObject {
-    baseUrl: string,
-    loginUrl: string,
-    dataUrl: string,
+    baseUrl: string;
+    loginUrl: string;
+    dataUrl: string;
+}
+
+interface LoginCreds {
+    username: string;
+    password: string;
 }
 
 /* ----------------------
@@ -28,10 +33,12 @@ interface UrlObject {
 ---------------------- */
 const gAPP: Application = express();
 const gACCOUNTS: AccountList = {};
+let gLOGINS: LoginCreds;
 
 // read in Sync mode since we are setting up the app and split it on the newlines
-const accountsFile: string[] = fs.readFileSync(path.join(__dirname + "/../accounts.txt"), "utf8").split("\r\n");
-const urlsFile: string[] = fs.readFileSync(path.join(__dirname + "/../urls.txt"), "utf8").split(",");
+const accountsFile: string[] = fs.readFileSync(path.join(__dirname + "/../_accounts.txt"), "utf8").split("\r\n");
+const urlsFile: string[] = fs.readFileSync(path.join(__dirname + "/../_urls.txt"), "utf8").split(",");
+const loginsFile: string[] = fs.readFileSync(path.join(__dirname + "/../_logins.txt"), "utf8").split("\r\n");
 
 const urlObj: UrlObject = {
     baseUrl: urlsFile[1],
@@ -45,12 +52,22 @@ accountsFile.forEach(each => {
     if (parts[0] === "Royalty") gACCOUNTS[parts[1]] = new RoyaltyAccount(parts[1], parts[2], urlObj);
 });
 
+loginsFile.forEach(each => {
+    // part0 = username, part1 = password
+    const parts: string[] = each.split(",");
+    gLOGINS = {
+        username: parts[0],
+        password: parts[1]
+    }
+});
+
 /* ----------------------
     App Setup
 ---------------------- */
 gAPP.use("/node_modules", express.static(path.join(__dirname + "/../../node_modules")));
 gAPP.use("/dist", express.static(path.join(__dirname + "/../../client/dist")));
 gAPP.use("/css", express.static(path.join(__dirname + "/../../client")));
+gAPP.use(express.json());
 
 gAPP.get("/", (req: Request, res: Response, next: NextFunction) => {
     const indexPath = path.join(__dirname + "/../../client/index.html");
@@ -60,6 +77,17 @@ gAPP.get("/", (req: Request, res: Response, next: NextFunction) => {
 
 gAPP.get("/ping", (req: Request, res: Response, next: NextFunction) => {
     return res.send("pong");
+});
+
+/*      LOGIN ROUTES     */
+
+gAPP.post("/login", (req: Request, res: Response, next: NextFunction) => {
+    if (req.body.username === gLOGINS.username && req.body.password === gLOGINS.password) {
+        res.status(200).json({ "status": true, "result": "valid credentials" });
+    }
+    else {
+        res.status(401).json({ "status": false, "result": "invalid credentials" });
+    }
 });
 
 /*      INFO ROUTES     */

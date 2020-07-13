@@ -2,8 +2,8 @@ import * as React from "react";
 import { Account } from "./Account";
 
 interface iProps {
-    compiler: string;
-    framework: string;
+    // compiler: string;
+    // framework: string;
 }
 
 interface iState {
@@ -28,15 +28,12 @@ export class AccountManager extends React.Component<iProps, iState> {
     }
 
     getAccounts = () => {
-        console.log("AccountManager getAccounts");
         fetch("/api/info/accounts")
             .then((response) => {
                 return response.json();
             })
             .then((data) => {
-                this.setState({
-                    accounts: data
-                }, () => console.log(this.state)); // console.log as a callback since setState is async
+                this.setState({ accounts: data });
             });
     }
 
@@ -46,10 +43,10 @@ export class AccountManager extends React.Component<iProps, iState> {
                 return { refreshing: !prevState.refreshing }; // shallow copy the updated refreshing param
             }, 
             ()=> {
-                const toggleButton = document.getElementById("toggleDatarefresh")!;
+                // doing all this as a callback since setState is async
+                const toggleButton = document.getElementById("toggleDataRefresh")!;
                 toggleButton.innerHTML = (this.state.refreshing ? "Stop" : "Start") + " Data Refresh";
-                console.log(this.state); // console.log as a callback since setState is async
-
+                
                 if(this.state.refreshing) {
                     // start the refresh timeouts
                     this.childrenRefs.forEach((child:React.RefObject<Account>, index:number) => {
@@ -66,8 +63,28 @@ export class AccountManager extends React.Component<iProps, iState> {
         );
     }
 
+    refreshOnDemand = () => {
+        const pullDataButton = document.getElementById("pullData")! as HTMLInputElement; // cast Input Element for "disabled"
+        pullDataButton.disabled = true; // disable the button
+
+        this.childrenRefs.forEach((child:React.RefObject<Account>, index:number) => {
+            // if we're currently refereshing regularly we want to kill the time out and 
+            // leverage runUpdate to immediately request again AND seamlessly start a new Timeout
+            if (this.state.refreshing) {
+                child.current?.stopUpdate(); // kill the timeout
+                child.current?.runUpdate(); // start new timeout
+            }
+            // otherwise just do a data pull but don't start a new Timeout (separate functionality)
+            else child.current?.requestData(); // do the independent data pull
+        });
+
+        // re-enable the button after 1 second to prevent spamming
+        window.setTimeout(() => {
+            pullDataButton.disabled = false;
+        }, 1000);
+    }
+
     buildChildren = (): JSX.Element[] => {
-        console.log("AccountManager running buildChildren");
         const children:JSX.Element[] = [];
 
         this.state.accounts.forEach((account:string, index:number) => {
@@ -87,8 +104,8 @@ export class AccountManager extends React.Component<iProps, iState> {
     render() {
         return (
             <div>
-                <button id="refreshAccounts" onClick={this.getAccounts}>Refresh Account List</button>
-                <button id="toggleDatarefresh" onClick={this.toggleRefresh}>Stop Data Refresh</button>
+                <button id="pullData" onClick={this.refreshOnDemand}>Pull Data Now</button>
+                <button id="toggleDataRefresh" onClick={this.toggleRefresh}>Stop Data Refresh</button>
 
                 <div id="accounts">
                     {this.buildChildren()}
@@ -98,7 +115,6 @@ export class AccountManager extends React.Component<iProps, iState> {
     }
 
     componentDidMount() {
-        console.log("AccountManager componentDidMount");
         this.getAccounts();
     }
 } 

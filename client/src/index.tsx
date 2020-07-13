@@ -1,9 +1,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { AccountManager } from "./components/AccountManager";
+import { App } from "./components/App";
 
+// <AccountManager compiler="TypeScript" framework="React" />,
 ReactDOM.render(
-    <AccountManager compiler="TypeScript" framework="React" />,
-    document.getElementById("index")
+    <App />, document.getElementById("index")
 );
