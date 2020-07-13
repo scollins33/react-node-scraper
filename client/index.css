@@ -57,3 +57,13 @@
 .accountBody {
     padding: 10px 3px;
 }
+
+@keyframes colorFlash {
+    from {background-color: green;}
+    to {background-color: black;}
+}
+
+.flash {
+    animation-duration: 1s;
+    animation-name: colorFlash;
+}

@@ -10,6 +10,7 @@ interface iProps {
 }
 
 interface iState {
+    headerClasses: string,
     rows: DataRow[],
     refreshRange: number[],
 }
@@ -26,6 +27,7 @@ export class Account extends React.Component<iProps, iState> {
 
         // set the default refresh rate
         this.state = {
+            headerClasses: "accountHeader",
             rows: [],
             refreshRange: [10000, 20000],
         }
@@ -41,7 +43,14 @@ export class Account extends React.Component<iProps, iState> {
             })
             .then((data) => {
                 this.setState({
+                    headerClasses: "accountHeader flash",
                     rows: data
+                },
+                () => {
+                    // callback to create timeout to remove flash class
+                    window.setTimeout(() => {
+                        this.setState({ headerClasses: "accountHeader" });
+                    }, 1000);
                 });
             });
     }
@@ -52,11 +61,11 @@ export class Account extends React.Component<iProps, iState> {
         // now we set up for the next update (recursive timeouts baby!)
         const newTime = Math.floor(Math.random() * (this.state.refreshRange[1] - this.state.refreshRange[0])) + this.state.refreshRange[0];
         this.timeoutID = window.setTimeout(this.runUpdate, newTime);
-        console.log(this.props.name, "runUpdate", newTime, "as ID", this.timeoutID);
+        // console.log(this.props.name, "runUpdate", newTime, "as ID", this.timeoutID);
     }
 
     stopUpdate = () => {
-        console.log(this.props.name, "stopUpdate as ID", this.timeoutID);
+        // console.log(this.props.name, "stopUpdate as ID", this.timeoutID);
         window.clearTimeout(this.timeoutID);
     }
 
@@ -84,7 +93,7 @@ export class Account extends React.Component<iProps, iState> {
     render() {
         return (
             <div id={this.props.name} className="account">
-                <div className="accountHeader">{this.props.name}</div>
+                <div className={this.state.headerClasses}>{this.props.name}</div>
                 <div className="accountBody">
                     {this.buildChildren()}
                 </div>

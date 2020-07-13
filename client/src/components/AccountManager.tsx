@@ -81,7 +81,7 @@ export class AccountManager extends React.Component<iProps, iState> {
         // re-enable the button after 1 second to prevent spamming
         window.setTimeout(() => {
             pullDataButton.disabled = false;
-        }, 1000);
+        }, 1100);
     }
 
     buildChildren = (): JSX.Element[] => {
